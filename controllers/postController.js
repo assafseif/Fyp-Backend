@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Post from "../models/post.js";
 import User from "../models/user.js";
+import Favorite from "../models/AddToFavorite.js";
+
 
 export const addPost = async (req, res, next) => {
   const { title, description, videoUrl } = req.body;
@@ -43,6 +45,15 @@ export const deletePost = async (req, res, next) => {
     }
 
     const awaitedDelete = await post.deleteOne({ _id: postId });
+    const UpdatedFavorite = await Favorite.updateOne(
+      {
+        "posts.postId": { $in: [postId] },
+      },
+      { $pull: { posts: { postId: postId } } }
+    );
+
+    console.log(UpdatedFavorite)
+
     return res
       .status(200)
       .json({ message: "deleted", awaitedDelete: awaitedDelete });
